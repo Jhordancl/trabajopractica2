@@ -1,0 +1,104 @@
+@model PlataformaCreditos.Models.ViewModels.SolicitudCreateViewModel
+@{
+    ViewData["Title"] = "Nueva Solicitud de Crédito";
+}
+
+<div class="container py-4">
+    <div class="row justify-content-center">
+        <div class="col-md-8 col-lg-6">
+            <div class="card shadow-sm border-0">
+                <div class="card-header bg-primary text-white py-3">
+                    <h4 class="mb-0"><i class="bi bi-cash-coin me-2"></i>Nueva Solicitud de Crédito</h4>
+                </div>
+                <div class="card-body p-4">
+
+                    @if (!ViewData.ModelState.IsValid)
+                    {
+                        <div class="alert alert-danger alert-dismissible fade show" role="alert">
+                            <strong><i class="bi bi-exclamation-triangle-fill me-2"></i>Por favor verifique los siguientes errores:</strong>
+                            <div asp-validation-summary="All" class="mt-2 mb-0"></div>
+                        </div>
+                    }
+
+                    @if (ViewBag.Error != null)
+                    {
+                        <div class="alert alert-danger" role="alert">
+                            <i class="bi bi-x-circle me-2"></i>@ViewBag.Error
+                        </div>
+                    }
+
+                    <!-- Información de Capacidad Crediticia -->
+                    <div class="card bg-light border-0 mb-4">
+                        <div class="card-body py-3">
+                            <h6 class="card-subtitle text-muted mb-2">Información del Solicitante</h6>
+                            <div class="d-flex justify-content-between mb-1">
+                                <span>Ingresos Mensuales Registrados:</span>
+                                <strong class="text-dark">@Model.IngresosMensuales.ToString("C2")</strong>
+                            </div>
+                            <div class="d-flex justify-content-between mb-1">
+                                <span>Límite Máximo de Solicitud (10×):</span>
+                                <strong class="text-success">@Model.MontoMaximoPermitido.ToString("C2")</strong>
+                            </div>
+                            <div class="d-flex justify-content-between">
+                                <span>Estado de Cuenta:</span>
+                                @if (Model.ClienteActivo)
+                                {
+                                    <span class="badge bg-success">Activo</span>
+                                }
+                                else
+                                {
+                                    <span class="badge bg-danger">Inactivo</span>
+                                }
+                            </div>
+                        </div>
+                    </div>
+
+                    @if (Model.TieneSolicitudPendiente)
+                    {
+                        <div class="alert alert-warning" role="alert">
+                            <i class="bi bi-info-circle-fill me-2"></i>
+                            <strong>Atención:</strong> Ya cuenta con una solicitud en estado <strong>Pendiente</strong>. Las políticas de la entidad financiera permiten únicamente una solicitud en evaluación por cliente.
+                        </div>
+                    }
+
+                    @if (!Model.ClienteActivo)
+                    {
+                        <div class="alert alert-danger" role="alert">
+                            <i class="bi bi-slash-circle me-2"></i>
+                            <strong>Cuenta Inactiva:</strong> Su cuenta de cliente no está habilitada para registrar nuevas solicitudes de crédito.
+                        </div>
+                    }
+
+                    <form asp-action="Crear" method="post" id="formCrearSolicitud">
+                        @Html.AntiForgeryToken()
+
+                        <div class="mb-3">
+                            <label asp-for="MontoSolicitado" class="form-label fw-bold"></label>
+                            <div class="input-group">
+                                <span class="input-group-text">$</span>
+                                <input asp-for="MontoSolicitado" class="form-control form-control-lg" type="number" step="0.01" min="0.01" placeholder="Ej: 5000.00" />
+                            </div>
+                            <span asp-validation-for="MontoSolicitado" class="text-danger small"></span>
+                            <div class="form-text">
+                                El monto debe ser mayor a 0 y no debe superar 10 veces sus ingresos mensuales (@Model.MontoMaximoPermitido.ToString("C2")).
+                            </div>
+                        </div>
+
+                        <div class="d-grid gap-2 d-md-flex justify-content-md-end mt-4">
+                            <a asp-action="Index" class="btn btn-outline-secondary me-md-2">
+                                <i class="bi bi-arrow-left me-1"></i>Regresar a Mis Solicitudes
+                            </a>
+                            <button type="submit" class="btn btn-primary px-4" @(Model.TieneSolicitudPendiente || !Model.ClienteActivo ? "disabled" : "")>
+                                <i class="bi bi-send me-1"></i>Enviar Solicitud
+                            </button>
+                        </div>
+                    </form>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+@section Scripts {
+    <partial name="_ValidationScriptsPartial" />
+}

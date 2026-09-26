@@ -4,7 +4,20 @@
     ViewData["Title"] = "Mis solicitudes";
 }
 
-<h2>Mis solicitudes</h2>
+<div class="d-flex justify-content-between align-items-center mb-3">
+    <h2>Mis solicitudes</h2>
+    <a asp-action="Crear" class="btn btn-success">
+        <i class="bi bi-plus-circle me-1"></i>+ Nueva Solicitud
+    </a>
+</div>
+
+@if (TempData["MensajeExito"] != null)
+{
+    <div class="alert alert-success alert-dismissible fade show" role="alert">
+        <i class="bi bi-check-circle-fill me-2"></i>@TempData["MensajeExito"]
+        <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+    </div>
+}
 
 @if (!ViewData.ModelState.IsValid)
 {
