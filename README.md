@@ -87,7 +87,7 @@ Al iniciar la aplicación, se cargan automáticamente:
 | **Paso 0** | `main` | Bootstrap inicial del repositorio y solución MVC con Identity | ✅ Completado |
 | **Pregunta 1** | `feature/bootstrap-dominio` | Modelos `Cliente` y `SolicitudCredito`, SQLite, SeedData y migraciones | ✅ Completado |
 | **Pregunta 2** | `feature/catalogo-solicitudes` | Vista "Mis solicitudes", detalle, filtros y validaciones server-side | ✅ Completado |
-| **Pregunta 3** | `feature/solicitudes` | Formulario de registro de solicitud con validaciones de negocio (10× ingresos, único pendiente) | ⏳ Pendiente |
+| **Pregunta 3** | `feature/solicitudes` | Formulario de registro de solicitud con validaciones de negocio (10× ingresos, único pendiente) | ✅ Completado |
 | **Pregunta 4** | `feature/sesion-redis` | Sesión y caché distribuida con Redis, docker-compose local | ⏳ Pendiente |
 | **Pregunta 5** | `feature/panel-analista` | Panel de analista protegido por rol, aprobar/rechazar solicitudes | ⏳ Pendiente |
 | **Pregunta 6** | `feature/websocket-notificaciones` | Notificaciones en tiempo real vía WebSocket / SignalR con reconexión | ⏳ Pendiente |
