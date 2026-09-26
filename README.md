@@ -93,7 +93,7 @@ Al iniciar la aplicación, se cargan automáticamente:
 | **Pregunta 2** | `feature/catalogo-solicitudes` | Vista "Mis solicitudes", detalle, filtros y validaciones server-side | ✅ Completado |
 | **Pregunta 3** | `feature/solicitudes` | Formulario de registro de solicitud con validaciones de negocio (10× ingresos, único pendiente) | ✅ Completado |
 | **Pregunta 4** | `feature/sesion-redis` | Sesión y caché distribuida con Redis (`IDistributedCache`), docker-compose local | ✅ Completado |
-| **Pregunta 5** | `feature/panel-analista` | Panel de analista protegido por rol, aprobar/rechazar solicitudes | ⏳ Pendiente |
+| **Pregunta 5** | `feature/panel-analista` | Panel de analista protegido por rol (`/Analista`), aprobar/rechazar con regla 5× ingresos | ✅ Completado |
 | **Pregunta 6** | `feature/websocket-notificaciones` | Notificaciones en tiempo real vía WebSocket / SignalR con reconexión | ⏳ Pendiente |
 | **Pregunta 7** | `feature/cloudmq-notificaciones` | Mensajería asíncrona con RabbitMQ (CloudAMQP) y `BackgroundService` | ⏳ Pendiente |
 | **Pregunta 8** | `deploy/render` | Despliegue en Render.com con variables de entorno y SQLite persistente | ⏳ Pendiente |
