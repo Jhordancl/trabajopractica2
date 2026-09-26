@@ -41,6 +41,14 @@
                                 </a>
                             </li>
                         }
+                        @if (User.IsInRole("Analista"))
+                        {
+                            <li class="nav-item">
+                                <a class="nav-link text-danger fw-bold" asp-controller="Analista" asp-action="Index">
+                                    <i class="bi bi-shield-check me-1"></i>Panel Analista
+                                </a>
+                            </li>
+                        }
                     </ul>
                     <partial name="_LoginPartial" />
                 </div>
