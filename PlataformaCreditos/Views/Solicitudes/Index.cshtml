@@ -1,0 +1,76 @@
+@model PlataformaCreditos.Models.ViewModels.SolicitudFiltroViewModel
+
+@{
+    ViewData["Title"] = "Mis solicitudes";
+}
+
+<h2>Mis solicitudes</h2>
+
+@if (!ViewData.ModelState.IsValid)
+{
+    <div class="alert alert-danger">
+        <ul>
+            @foreach (var error in ViewData.ModelState.Values.SelectMany(v => v.Errors))
+            {
+                <li>@error.ErrorMessage</li>
+            }
+        </ul>
+    </div>
+}
+
+<form method="get" asp-action="Index" class="row g-2 mb-4">
+    <div class="col-md-2">
+        <label class="form-label">Estado</label>
+        <select name="Estado" class="form-select" asp-items="Html.GetEnumSelectList<PlataformaCreditos.Models.EstadoSolicitud>()">
+            <option value="">-- Todos --</option>
+        </select>
+    </div>
+    <div class="col-md-2">
+        <label class="form-label">Monto mínimo</label>
+        <input type="number" step="0.01" name="MontoMinimo" class="form-control" value="@Model.MontoMinimo" />
+    </div>
+    <div class="col-md-2">
+        <label class="form-label">Monto máximo</label>
+        <input type="number" step="0.01" name="MontoMaximo" class="form-control" value="@Model.MontoMaximo" />
+    </div>
+    <div class="col-md-2">
+        <label class="form-label">Fecha inicio</label>
+        <input type="date" name="FechaInicio" class="form-control" value="@Model.FechaInicio?.ToString("yyyy-MM-dd")" />
+    </div>
+    <div class="col-md-2">
+        <label class="form-label">Fecha fin</label>
+        <input type="date" name="FechaFin" class="form-control" value="@Model.FechaFin?.ToString("yyyy-MM-dd")" />
+    </div>
+    <div class="col-md-2 d-flex align-items-end">
+        <button type="submit" class="btn btn-primary w-100">Filtrar</button>
+    </div>
+</form>
+
+<table class="table table-striped">
+    <thead>
+        <tr>
+            <th>Fecha</th>
+            <th>Monto</th>
+            <th>Estado</th>
+            <th></th>
+        </tr>
+    </thead>
+    <tbody>
+        @foreach (var s in Model.Resultados)
+        {
+            <tr>
+                <td>@s.FechaSolicitud.ToString("dd/MM/yyyy")</td>
+                <td>@s.MontoSolicitado.ToString("C")</td>
+                <td>@s.Estado</td>
+                <td>
+                    <a asp-action="Detalle" asp-route-id="@s.Id" class="btn btn-sm btn-outline-secondary">Ver detalle</a>
+                </td>
+            </tr>
+        }
+    </tbody>
+</table>
+
+@if (!Model.Resultados.Any())
+{
+    <p class="text-muted">No se encontraron solicitudes con los filtros aplicados.</p>
+}
