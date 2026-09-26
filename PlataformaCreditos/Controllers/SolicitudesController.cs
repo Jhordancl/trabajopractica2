@@ -1,7 +1,9 @@
+using System.Text.Json;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
+using Microsoft.Extensions.Caching.Distributed;
 using PlataformaCreditos.Data;
 using PlataformaCreditos.Models;
 using PlataformaCreditos.Models.ViewModels;
@@ -13,11 +15,19 @@ namespace PlataformaCreditos.Controllers
     {
         private readonly ApplicationDbContext _context;
         private readonly UserManager<IdentityUser> _userManager;
+        private readonly IDistributedCache _cache;
+        private readonly ILogger<SolicitudesController> _logger;
 
-        public SolicitudesController(ApplicationDbContext context, UserManager<IdentityUser> userManager)
+        public SolicitudesController(
+            ApplicationDbContext context,
+            UserManager<IdentityUser> userManager,
+            IDistributedCache cache,
+            ILogger<SolicitudesController> logger)
         {
             _context = context;
             _userManager = userManager;
+            _cache = cache;
+            _logger = logger;
         }
 
         // GET: /Solicitudes
@@ -46,9 +56,45 @@ namespace PlataformaCreditos.Controllers
                 ModelState.AddModelError(string.Empty, "La fecha de inicio no puede ser mayor a la fecha fin.");
             }
 
-            var query = _context.Solicitudes
-                .Where(s => s.ClienteId == cliente.Id)
-                .AsQueryable();
+            // Caché distribuida de 60 segundos por cliente
+            var cacheKey = $"solicitudes_cliente_{cliente.Id}";
+            List<SolicitudCredito>? solicitudes = null;
+
+            try
+            {
+                var cachedData = await _cache.GetStringAsync(cacheKey);
+                if (!string.IsNullOrEmpty(cachedData))
+                {
+                    solicitudes = JsonSerializer.Deserialize<List<SolicitudCredito>>(cachedData);
+                }
+            }
+            catch (Exception ex)
+            {
+                _logger.LogWarning(ex, "Error al leer de la caché Redis para {Key}. Se consultará la BD.", cacheKey);
+            }
+
+            if (solicitudes is null)
+            {
+                solicitudes = await _context.Solicitudes
+                    .Where(s => s.ClienteId == cliente.Id)
+                    .OrderByDescending(s => s.FechaSolicitud)
+                    .ToListAsync();
+
+                try
+                {
+                    var serialized = JsonSerializer.Serialize(solicitudes);
+                    await _cache.SetStringAsync(cacheKey, serialized, new DistributedCacheEntryOptions
+                    {
+                        AbsoluteExpirationRelativeToNow = TimeSpan.FromSeconds(60)
+                    });
+                }
+                catch (Exception ex)
+                {
+                    _logger.LogWarning(ex, "Error al escribir en la caché Redis para {Key}.", cacheKey);
+                }
+            }
+
+            IEnumerable<SolicitudCredito> query = solicitudes;
 
             if (ModelState.IsValid)
             {
@@ -74,13 +120,11 @@ namespace PlataformaCreditos.Controllers
 
                 if (filtro.FechaFin.HasValue)
                 {
-                    query = query.Where(s => s.FechaSolicitud <= filtro.FechaFin.Value);
+                    query = query.Where(s => s.FechaSolicitud <= filtro.FechaFin.Value.Date.AddDays(1).AddTicks(-1));
                 }
             }
 
-            filtro.Resultados = await query
-                .OrderByDescending(s => s.FechaSolicitud)
-                .ToListAsync();
+            filtro.Resultados = query.ToList();
 
             return View(filtro);
         }
@@ -104,6 +148,10 @@ namespace PlataformaCreditos.Controllers
             {
                 return Forbid();
             }
+
+            // Guardar en sesión respaldada por Redis la última solicitud visitada
+            HttpContext.Session.SetString("UltimaSolicitud_Id", solicitud.Id.ToString());
+            HttpContext.Session.SetString("UltimaSolicitud_Monto", solicitud.MontoSolicitado.ToString("C"));
 
             return View(solicitud);
         }
@@ -205,6 +253,17 @@ namespace PlataformaCreditos.Controllers
 
             _context.Solicitudes.Add(solicitud);
             await _context.SaveChangesAsync();
+
+            // Invalidar caché Redis del listado de solicitudes del cliente
+            var cacheKey = $"solicitudes_cliente_{cliente.Id}";
+            try
+            {
+                await _cache.RemoveAsync(cacheKey);
+            }
+            catch (Exception ex)
+            {
+                _logger.LogWarning(ex, "Error al invalidar caché Redis para {Key}.", cacheKey);
+            }
 
             TempData["MensajeExito"] = $"¡Solicitud #{solicitud.Id} registrada exitosamente por un monto de {solicitud.MontoSolicitado:C2}!";
             return RedirectToAction(nameof(Detalle), new { id = solicitud.Id });

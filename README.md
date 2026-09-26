@@ -67,15 +67,19 @@ Al iniciar la aplicación, se cargan automáticamente:
 
 ## 🚀 Ejecución Local
 
-1. **Restaurar dependencias y compilar:**
+1. **Levantar Redis local con Docker Compose:**
+   ```bash
+   docker-compose up -d
+   ```
+2. **Restaurar dependencias y compilar:**
    ```bash
    dotnet build PlataformaCreditos/PlataformaCreditos.csproj
    ```
-2. **Ejecutar la aplicación:**
+3. **Ejecutar la aplicación:**
    ```bash
    dotnet run --project PlataformaCreditos/PlataformaCreditos.csproj
    ```
-3. **Acceder a la aplicación:**
+4. **Acceder a la aplicación:**
    Navegar a `http://localhost:5000` o la URL configurada por Kestrel.
 
 ---
@@ -88,7 +92,7 @@ Al iniciar la aplicación, se cargan automáticamente:
 | **Pregunta 1** | `feature/bootstrap-dominio` | Modelos `Cliente` y `SolicitudCredito`, SQLite, SeedData y migraciones | ✅ Completado |
 | **Pregunta 2** | `feature/catalogo-solicitudes` | Vista "Mis solicitudes", detalle, filtros y validaciones server-side | ✅ Completado |
 | **Pregunta 3** | `feature/solicitudes` | Formulario de registro de solicitud con validaciones de negocio (10× ingresos, único pendiente) | ✅ Completado |
-| **Pregunta 4** | `feature/sesion-redis` | Sesión y caché distribuida con Redis, docker-compose local | ⏳ Pendiente |
+| **Pregunta 4** | `feature/sesion-redis` | Sesión y caché distribuida con Redis (`IDistributedCache`), docker-compose local | ✅ Completado |
 | **Pregunta 5** | `feature/panel-analista` | Panel de analista protegido por rol, aprobar/rechazar solicitudes | ⏳ Pendiente |
 | **Pregunta 6** | `feature/websocket-notificaciones` | Notificaciones en tiempo real vía WebSocket / SignalR con reconexión | ⏳ Pendiente |
 | **Pregunta 7** | `feature/cloudmq-notificaciones` | Mensajería asíncrona con RabbitMQ (CloudAMQP) y `BackgroundService` | ⏳ Pendiente |
